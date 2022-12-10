@@ -3,9 +3,19 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const { Poll } = pkg;
+const { Pool } = pkg;
 
 
-const connection = new Pool({
+/*const connection = new Pool({
     connectionString: process.env.DATABASE_URL,
-});
+});*/
+
+export const connection = new Pool({
+    host: 'localhost',
+    port: 5432,
+    user: 'postgres',
+    password: 'gusta421',
+    database: 'boardcamp'
+  });
+
+
