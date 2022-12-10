@@ -10,4 +10,4 @@ server.use(express.json());
 
 server.use(router);
 
-server.listen(5000, () => console.log("server running at port 5000!"));
+server.listen(4000, () => console.log("server running at port 4000!"));
