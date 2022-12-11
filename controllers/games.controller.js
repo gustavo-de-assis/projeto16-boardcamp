@@ -3,6 +3,7 @@ import { connection } from "../database/db.js";
 export async function getGames(req, res) {
 
     const name = req.query.name;
+    console.log(name);
     let games;
 
     try {
@@ -12,8 +13,8 @@ export async function getGames(req, res) {
             FROM games 
             JOIN categories 
             ON games."categoryId" = categories.id 
-            WHERE games."name" 
-            LIKE '%($1)';`[name]);
+            WHERE (games.name) 
+            ILIKE '${name}%';`);
         } else {
             games = await connection.query(`SELECT games.*, 
             categories.name AS categoryName 
@@ -25,6 +26,7 @@ export async function getGames(req, res) {
         return res.status(200).send(games.rows);
 
     } catch (err) {
+        console.log(err);
         res.sendStatus(500);
     }
 
