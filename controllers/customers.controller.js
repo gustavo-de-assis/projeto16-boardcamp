@@ -1,5 +1,29 @@
 import { connection } from "../database/db.js";
 
+export async function getCustomers(req, res) {
+    
+    const cpf = req.query.cpf;
+    console.log(cpf);
+    let customers;
+
+    try {
+        if (cpf) {
+            customers = await connection.query(`SELECT * FROM customers 
+            WHERE cpf
+            ILIKE '${cpf}%';`);
+        } else {
+            customers = await connection.query("SELECT * FROM customers;");
+        }
+
+        return res.status(200).send(customers.rows);
+
+    } catch (err) {
+        console.log(err);
+        res.sendStatus(500);
+    }
+
+}
+
 export async function setCustomers(req, res) {
     const { name, phone, cpf, birthday } = req.body;
 
