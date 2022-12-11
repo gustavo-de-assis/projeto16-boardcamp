@@ -1,7 +1,7 @@
 import { connection } from "../database/db.js";
 
 export async function getCustomers(req, res) {
-    
+
     const cpf = req.query.cpf;
     console.log(cpf);
     let customers;
@@ -24,6 +24,24 @@ export async function getCustomers(req, res) {
 
 }
 
+export async function getCustomersById(req, res) {
+    const { id } = req.params;
+
+    try {
+        const customer = await connection.query("SELECT * FROM customers WHERE id = ($1);", [id]);
+        if (customer.rows.length > 0) {
+            return res.status(200).send(customer.rows);
+        } else {
+            return res.status(404).send("Customer not found!");
+
+        }
+
+    } catch (err) {
+        console.log(err);
+        res.sendStatus(500);
+    }
+
+}
 export async function setCustomers(req, res) {
     const { name, phone, cpf, birthday } = req.body;
 
