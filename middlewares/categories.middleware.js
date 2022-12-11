@@ -1,7 +1,7 @@
 import joi from "joi";
 
 const categorySchema = joi.object({
-    name: joi.string().min(3).required()
+    name: joi.string().min(1).required()
 });
 
 export function categoryValidation(req, res, next){
@@ -13,7 +13,7 @@ export function categoryValidation(req, res, next){
 
     if(validationError){
         const error = validationError.details.map((e) => e.message);
-        return res.status(422).send(error);
+        return res.status(400).send(error);
     }
 
     next();
