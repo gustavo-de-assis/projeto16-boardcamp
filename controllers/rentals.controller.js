@@ -3,7 +3,7 @@ import { connection } from "../database/db.js";
 
 
 export async function getRentals(req, res) {
-    const {gameId, customerId}= req.query // lembrar de testar isNan
+    const { gameId, customerId } = req.query // lembrar de testar isNan
 
     try {
         let rentals = await connection.query(`
@@ -14,7 +14,7 @@ export async function getRentals(req, res) {
         rentals JOIN customers ON rentals."customerId" = customers.id
         JOIN games ON rentals."gameId" = games.id JOIN categories ON games."categoryId" = categories.id;
         `);
-        
+
         const rentalObj = rentals.rows.map((r) => {
             const attributes = { ...r };
             const obj = {
@@ -43,12 +43,12 @@ export async function getRentals(req, res) {
 
         rentals = [...rentalObj];
 
-        if (customerId){
+        if (!isNaN(customerId)) {
             rentals = rentalObj.filter((c) => c.customerId == customerId);
         }
 
-        if (gameId){
-            rentals = rentals.filter((g)=> g.gameId == gameId);
+        if (!isNaN(gameId)) {
+            rentals = rentals.filter((g) => g.gameId == gameId);
         }
 
         return res.status(200).send(rentals);
@@ -93,6 +93,48 @@ export async function setRentals(req, res) {
             [customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee]);
 
         return res.sendStatus(201);
+
+    } catch (err) {
+        console.log(err);
+        res.sendStatus(500);
+    }
+
+}
+
+export async function returnRentals(req, res) {
+    const { id } = req.params;
+    const returnDate = dayjs();
+
+    try {
+        const rental = await connection.query("SELECT * FROM rentals WHERE id = ($1)", [id]);
+
+        if (rental.rows.length === 0) {
+            return res.status(404).send("Rental not Found!");
+        }
+        if (rental.rows[0].returnDate) {
+            return res.status(400).send("Game already returned!");
+        }
+
+        const game = await connection.query(`
+        SELECT "pricePerDay" 
+        FROM games 
+        WHERE id = ($1)`, [rental.rows[0].gameId]);
+
+        const rentalDate = rental.rows[0].rentDate;
+        const duration = returnDate.diff(rentalDate, 'day');
+
+        const delayFee = (duration - rental.rows[0].daysRented) * game.rows[0].pricePerDay;
+        console.log("atraso", delayFee);
+
+        if (delayFee > 0) {
+            await connection.query(`UPDATE rentals SET "delayFee"=($1) WHERE id = ($2);`, [delayFee, id]);
+        } else {
+            await connection.query(`UPDATE rentals SET "delayFee"=0 WHERE id = ($1);`, [id]);
+        }
+
+        await connection.query(`UPDATE rentals SET "returnDate"=($1) WHERE id = ($2);`, [returnDate, id])
+
+        return res.sendStatus(200);
 
     } catch (err) {
         console.log(err);
