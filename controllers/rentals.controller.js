@@ -3,18 +3,18 @@ import { connection } from "../database/db.js";
 
 
 export async function getRentals(req, res) {
-    //let { customerId, gameId } = req.query; // lembrar de testar isNan
+    const {gameId, customerId}= req.query // lembrar de testar isNan
 
     try {
-        const rentals = await connection.query(`
+        let rentals = await connection.query(`
         SELECT rentals.*, 
-        customers.id, customers.name as "customerName",
-        games.id, games.name, games."categoryId",
+        customers.id AS "customerId", customers.name as "customerName",
+        games.id AS "gameId", games.name, games."categoryId",
         categories.name AS "categoryName" FROM 
         rentals JOIN customers ON rentals."customerId" = customers.id
         JOIN games ON rentals."gameId" = games.id JOIN categories ON games."categoryId" = categories.id;
         `);
-
+        
         const rentalObj = rentals.rows.map((r) => {
             const attributes = { ...r };
             const obj = {
@@ -41,7 +41,17 @@ export async function getRentals(req, res) {
             return obj;
         });
 
-        return res.status(200).send(rentalObj);
+        rentals = [...rentalObj];
+
+        if (customerId){
+            rentals = rentalObj.filter((c) => c.customerId == customerId);
+        }
+
+        if (gameId){
+            rentals = rentals.filter((g)=> g.gameId == gameId);
+        }
+
+        return res.status(200).send(rentals);
     }
     catch (err) {
         console.log(err);
