@@ -142,3 +142,26 @@ export async function returnRentals(req, res) {
     }
 
 }
+
+export async function deleteRentals(req, res) {
+    const { id } = req.params;
+
+    try{
+        const rental = await connection.query("SELECT * FROM rentals WHERE id = ($1)", [id]);
+
+        if (rental.rows.length === 0) {
+            return res.status(404).send("Rental not Found!");
+        }
+        if (rental.rows[0].returnDate) {
+            return res.status(400).send("Game already returned!");
+        }
+
+        await connection.query(`DELETE FROM rentals WHERE id = ($1);`,[id]);
+
+        return res.sendStatus(200);
+
+    } catch(err) {
+        console.log(err);
+        res.sendStatus(500);
+    }
+}
