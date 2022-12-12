@@ -3,7 +3,6 @@ import { connection } from "../database/db.js";
 export async function getCustomers(req, res) {
 
     const cpf = req.query.cpf;
-    console.log(cpf);
     let customers;
 
     try {

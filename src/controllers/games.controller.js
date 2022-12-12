@@ -3,7 +3,6 @@ import { connection } from "../database/db.js";
 export async function getGames(req, res) {
 
     const name = req.query.name;
-    console.log(name);
     let games;
 
     try {
