@@ -77,6 +77,7 @@ export async function setRentals(req, res) {
             return res.status(400).send("Customer not Found!");
         }
 
+        const newStock = games.rows[0].stockTotal -1;
 
         const rentDate = dayjs().format("YYYY/MM/DD");
         const originalPrice = daysRented * (game.rows[0].pricePerDay);
@@ -91,7 +92,7 @@ export async function setRentals(req, res) {
         "originalPrice", "delayFee")
         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
             [customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee]);
-
+        await (`UPDATE games SET stockTotal = ($1) WHERE id = ($2)`, [newStock, gameId]);
         return res.sendStatus(201);
 
     } catch (err) {
