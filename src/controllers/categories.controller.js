@@ -1,8 +1,11 @@
 import { connection } from "../database/db.js";
 
 export async function getCategories(req, res) {
+    const { offset, limit } = req.query;
+    
+
     try {
-        const categories = await connection.query("SELECT * FROM categories;");
+        const categories = await connection.query("SELECT * FROM categories OFFSET ($1) LIMIT ($2);", [offset, limit]);
         return res.status(200).send(categories.rows);
 
     } catch (err) {

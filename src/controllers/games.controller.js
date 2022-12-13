@@ -2,7 +2,7 @@ import { connection } from "../database/db.js";
 
 export async function getGames(req, res) {
 
-    const name = req.query.name;
+    const {name, offset, limit} = req.query;
     let games;
 
     try {
@@ -13,13 +13,13 @@ export async function getGames(req, res) {
             JOIN categories 
             ON games."categoryId" = categories.id 
             WHERE (games.name) 
-            ILIKE '${name}%';`);
+            ILIKE '${name}%' OFFSET ($1) LIMIT ($2);`, [offset, limit]);
         } else {
             games = await connection.query(`SELECT games.*, 
             categories.name AS categoryName 
             FROM games 
             JOIN categories 
-            ON games."categoryId" = categories.id;`);
+            ON games."categoryId" = categories.id OFFSET ($1) LIMIT ($2);`, [offset, limit]);
         }
 
         return res.status(200).send(games.rows);

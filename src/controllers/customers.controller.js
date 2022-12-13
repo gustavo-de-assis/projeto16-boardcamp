@@ -2,7 +2,7 @@ import { connection } from "../database/db.js";
 
 export async function getCustomers(req, res) {
 
-    const cpf = req.query.cpf;
+    const { cpf, offset, limit} = req.query;
     let customers;
 
     try {
@@ -11,7 +11,7 @@ export async function getCustomers(req, res) {
             WHERE cpf
             ILIKE '${cpf}%';`);
         } else {
-            customers = await connection.query("SELECT * FROM customers;");
+            customers = await connection.query("SELECT * FROM customers OFFSET ($1) LIMIT ($2);", [offset, limit]);
         }
 
         return res.status(200).send(customers.rows);
